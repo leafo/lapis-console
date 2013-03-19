@@ -1,7 +1,6 @@
 
 lapis = require "lapis.init"
 
-
 {
   :respond_to, :capture_errors, :capture_errors_json, :assert_error,
   :yield_error
@@ -9,7 +8,7 @@ lapis = require "lapis.init"
 
 import assert_valid from require "lapis.validate"
 
-require "moonscript.init"
+_G.moon_no_loader = true
 
 lapis.serve class extends lapis.Application
   [index: "/"]: respond_to {
@@ -26,11 +25,10 @@ lapis.serve class extends lapis.Application
 
       if @params.lang == "moonscript"
         moonscript = require "moonscript"
-        { json: "hello #{moonscript}" }
-        -- fn, err = moonscript.loadstring @params.code
-        -- if err
-        --   { json: { error: err } }
-        -- else
-        --   { json: { ret: { fn! } }}
+        fn, err = moonscript.loadstring @params.code
+        if err
+          { json: { error: err } }
+        else
+          { json: { ret: { fn! } }}
   }
 
