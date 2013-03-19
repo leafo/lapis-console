@@ -8,8 +8,6 @@ lapis = require "lapis.init"
 
 import assert_valid from require "lapis.validate"
 
-_G.moon_no_loader = true
-
 lapis.serve class extends lapis.Application
   [index: "/"]: respond_to {
     GET: =>
@@ -24,7 +22,7 @@ lapis.serve class extends lapis.Application
       }
 
       if @params.lang == "moonscript"
-        moonscript = require "moonscript"
+        moonscript = require "moonscript.base"
         fn, err = moonscript.loadstring @params.code
         if err
           { json: { error: err } }

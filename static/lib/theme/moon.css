@@ -7,8 +7,12 @@
 }
 .cm-s-moon .CodeMirror-gutter {
   background: #464646;
-  border-right: 1px solid #797979;
 }
+
+.cm-s-moon .CodeMirror-gutters {
+    border-right: 1px solid #6B6B6B;
+}
+
 .cm-s-moon .CodeMirror-gutter-text {
   color: #B3B3B3;
   color: #585858;

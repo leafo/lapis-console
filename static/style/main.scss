@@ -1,1 +1,28 @@
 
+body {
+    font-family: sans-serif;
+    font-size: 16px;
+}
+
+#editor {
+    .status {
+        background: #7BB87B;
+        text-shadow: 1px 1px 1px darken(#7BB87B, 20%);
+        color: white;
+        padding: 4px 8px;
+
+        -webkit-transition: background 0.2s ease-in-out;
+        -moz-transition: background 0.2s ease-in-out;
+        transition: background 0.2s ease-in-out;
+
+        &.error {
+            background: #C25353;
+            text-shadow: 1px 1px 1px darken(#C25353, 10%);
+        }
+    }
+
+
+    .has_error {
+        background: rgba(255,0,0, 0.2);
+    }
+}

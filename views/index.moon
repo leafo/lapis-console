@@ -12,6 +12,8 @@ class Index extends Widget
       div ->
         textarea!
 
+      div class: "status", "Ready"
+
   content: =>
     html_5 ->
       head ->
@@ -23,7 +25,6 @@ class Index extends Widget
 
         link rel: "stylesheet", href: "/static/lib/codemirror.css"
         link rel: "stylesheet", href: "/static/lib/theme/moon.css"
-
         link rel: "stylesheet", href: "/static/style/main.css"
 
       body ->
