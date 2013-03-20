@@ -19,10 +19,39 @@ body {
             background: #C25353;
             text-shadow: 1px 1px 1px darken(#C25353, 10%);
         }
+
+        &.loading {
+            background: #E9D674;
+            text-shadow: 1px 1px 1px darken(#E9D674, 30%);
+        }
     }
 
 
     .has_error {
         background: rgba(255,0,0, 0.2);
+    }
+
+    .result {
+        border: 1px solid silver;
+        background: white;
+
+        color: #444;
+        margin: 10px 0;
+        .part {
+            margin: 5px;
+            padding:  5px;
+            display: inline-block;
+            &:hover {
+                background: #eee;
+            }
+        }
+
+        .queries {
+            font-family: monospace;
+            background: #ddd;
+            .query {
+                padding: 5px;
+            }
+        }
     }
 }

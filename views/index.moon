@@ -13,6 +13,8 @@ class Index extends Widget
         textarea!
 
       div class: "status", "Ready"
+      
+      div class: "log"
 
   content: =>
     html_5 ->

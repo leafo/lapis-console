@@ -7,6 +7,33 @@ lapis = require "lapis.init"
 } = require "lapis.application"
 
 import assert_valid from require "lapis.validate"
+import insert from table
+
+run = (fn using nil) ->
+  lines = {}
+  queries = {}
+
+  scope = setmetatable {
+    print: (...) ->
+      insert lines, {
+        ...
+      }
+  }, __index: _G
+
+  db = require "lapis.db"
+  old_logger = db.get_logger!
+  db.set_logger {
+    query: (q) ->
+      insert queries, q
+      old_logger.query q if old_logger
+  }
+
+  setfenv fn, scope
+  ret = { pcall fn }
+  return unpack ret, 1, 2 unless ret[1]
+
+  db.set_logger old_logger
+  lines, queries
 
 lapis.serve class extends lapis.Application
   [index: "/"]: respond_to {
@@ -27,6 +54,7 @@ lapis.serve class extends lapis.Application
         if err
           { json: { error: err } }
         else
-          { json: { ret: { fn! } }}
+          lines, queries = run fn
+          { json: { :lines, :queries } }
   }
 
