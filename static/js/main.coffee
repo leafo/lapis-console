@@ -27,6 +27,39 @@ class Lapis.Editor
       .addClass(name)
       .text(msg)
 
+  expand_object: (el) =>
+    obj = el.data "object"
+    el.empty().removeClass("expandable").addClass("expanded")
+
+    el.append "<div class='closable'>{</div>"
+    for k,v of obj
+      $('<div class="tuple"></div>')
+        .append(@render_value(k).addClass "key")
+        .append("<span class='sep'>: </span>")
+        .append(@render_value v)
+        .appendTo el
+
+    el.append "<div class='closable'>}</div>"
+
+  close_object: (el) =>
+    el.text("{ ... }").removeClass("expanded").addClass "expandable"
+
+  render_value: (val) =>
+    val_el = $('<div class="value"></div>')
+
+    t = typeof val
+    if t == "object"
+      val_el.text("{ ... }")
+        .addClass("object expandable")
+        .data("object", val)
+    else
+      val_el
+        .addClass(t)
+        .text(val)
+
+    val_el.attr "title", t
+    val_el
+
   render_result: (res) =>
     row = $ """
       <div class="result">
@@ -40,10 +73,8 @@ class Lapis.Editor
 
     for line in res.lines
       line_el = $('<div class="line"></div>')
-      for part in line
-        $('<div class="part"></div>')
-          .text(part)
-          .appendTo line_el
+      for value in line
+        @render_value(value).appendTo line_el
 
       line_el.appendTo lines_el
 
@@ -52,7 +83,7 @@ class Lapis.Editor
         .text(q)
         .appendTo queries_el
 
-    @log.append row
+    @log.prepend row
 
   constructor: (el) ->
     @el = $ el
@@ -86,4 +117,9 @@ class Lapis.Editor
 
     $ => @editor.focus()
 
+    @log.on "click", ".expandable", (e) =>
+      @expand_object $ e.currentTarget
+
+    @log.on "click", ".closable", (e) =>
+      @close_object $(e.currentTarget).closest ".object"
 

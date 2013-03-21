@@ -37,12 +37,93 @@ body {
 
         color: #444;
         margin: 10px 0;
-        .part {
+
+        .value {
             margin: 5px;
             padding:  5px;
             display: inline-block;
+            vertical-align: top;
+
+            &.string {
+                color: #648164;
+                &:before {
+                    font-weight: bold;
+                    content: '"';
+                }
+
+                &:after {
+                    font-weight: bold;
+                    content: '"';
+                }
+            }
+
+            &.boolean {
+                color: #664B66;
+            }
+
+            &.number {
+                color: #5076A0;
+            }
+
+            &.key {
+                margin-right: 0;
+                padding-right: 0;
+            }
+
             &:hover {
                 background: #eee;
+                border-radius: 3px;
+            }
+
+            &.expanded {
+                border-left: 1px dashed silver;
+                margin-left: 10px;
+                padding: 0;
+
+                &:hover {
+                    background: white;
+                }
+            }
+        }
+
+        .sep {
+            padding: 5px 0;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .tuple {
+            margin-left: 10px;
+            & > .value {
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+        }
+
+        .expandable {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .closable {
+            font-weight: bold;
+            vertical-align: top;
+            display: inline-block;
+            cursor: pointer;
+            padding: 5px;
+            margin: 5px;
+
+            &:first-child {
+                margin-bottom: 0;
+            }
+
+            &:last-child {
+                margin-top: 0;
+            }
+
+            &:hover {
+                background: #eee;
+                border-radius: 3px;
             }
         }
 
@@ -54,4 +135,5 @@ body {
             }
         }
     }
+
 }
