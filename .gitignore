@@ -1,7 +1,6 @@
 *.lua
 .tup
 logs/
-lapis
 nginx.conf.compiled
 secret/
 cache/
