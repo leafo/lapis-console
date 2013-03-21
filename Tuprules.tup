@@ -1,1 +1,4 @@
+root_dir = $(TUP_CWD)
+static_dir = $(TUP_CWD)/static
+
 : foreach *.moon |> moonc %f |> %B.lua

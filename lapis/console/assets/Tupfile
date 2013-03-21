@@ -1,0 +1,13 @@
+include_rules
+
+!pack = |> ^ pack %b > %o^ (echo 'return [==['; cat %f; echo ']==]' ) > %o |>
+
+# pack javascript
+: foreach $(static_dir)/lib/*.js        |> !pack |> lib_%B_js.lua
+: foreach $(static_dir)/lib/mode/*.js   |> !pack |> mode_%B_js.lua
+: foreach $(static_dir)/js/*.js         |> !pack |> %B_js.lua
+
+# pack css
+: foreach $(static_dir)/lib/*.css       |> !pack |> lib_%B_css.lua
+: foreach $(static_dir)/lib/theme/*.css |> !pack |> theme_%B_css.lua
+: foreach $(static_dir)/style/*.css     |> !pack |> %B_css.lua

@@ -1,7 +1,7 @@
 
 import Widget from require "lapis.html"
 
-class Index extends Widget
+class Console extends Widget
   body_content: =>
     div id: "editor", ->
       div class: "editor_top", ->
@@ -23,7 +23,6 @@ class Index extends Widget
     html_5 ->
       head ->
         script type: "text/javascript", src: "/static/lib/jquery.min.js"
-        script type: "text/javascript", src: "/static/lib/jquery.hotkeys.js"
         script type: "text/javascript", src: "/static/lib/codemirror.js"
         script type: "text/javascript", src: "/static/lib/mode/moonscript.js"
         script type: "text/javascript", src: "/static/js/main.js"
