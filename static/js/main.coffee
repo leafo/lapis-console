@@ -49,9 +49,13 @@ class Lapis.Editor
     [type, content] = val
 
     if type == "table"
-      val_el.text("{ ... }")
+      has_content = content.length > 0
+
+      val_el.text("{ #{has_content && "..." || ""} }")
         .addClass("object expandable")
+        .toggleClass("expandable", has_content)
         .data("tuples", content)
+
     else
       val_el
         .addClass(type)
@@ -120,7 +124,7 @@ class Lapis.Editor
     }
 
     @el.on "click", ".run_btn", run_handler
-    @el.on "click", ".clear_btn", run_handler
+    @el.on "click", ".clear_btn", clear_handler
 
     $ => @editor.focus()
 

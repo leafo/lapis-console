@@ -31,6 +31,12 @@ encode_value = (val, seen=nil) ->
       tuples = for k,v in pairs val
         { encode_value(k, seen), encode_value(v, seen) }
 
+      if meta = getmetatable val
+        insert tuples, {
+          { "metatable", "metatable" }
+          encode_value meta, seen
+        }
+
       { t, tuples }
     else
       { t, raw_tostring val }

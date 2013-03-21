@@ -141,7 +141,7 @@ body {
                 color: #5076A0;
             }
 
-            &.function, &.recursion {
+            &.function, &.recursion, &.metatable {
                 color: #888;
                 font-style: italic;
             }
