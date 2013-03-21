@@ -2,9 +2,68 @@
 body {
     font-family: sans-serif;
     font-size: 16px;
+    background: #D6D6D6;
+    margin: 0;
 }
 
 #editor {
+    .CodeMirror {
+        height: auto;
+    }
+
+    .CodeMirror-scroll {
+        overflow-y: hidden;
+        overflow-x: auto;
+    }
+
+    .editor_top {
+        background: whitesmoke;
+        padding: 20px;
+        border-bottom: 1px solid #B1AFAF;
+        box-shadow: 0 -2px 4px 4px rgba(0,0,0, 0.15);
+    }
+
+    .log {
+        padding: 0 20px;
+    }
+
+    .footer {
+        text-align: center;
+        margin: 10px;
+        font-size: 12px;
+        color: #838383;
+    }
+
+    .buttons_top {
+        font-size: 0;
+        margin-bottom: 7px;
+        button {
+            $color: #8AA8CF;
+            font-size: 16px;
+            background: $color;
+            // text-shadow: 1px 1px 1px lighten($color, 20%);
+            color: darken($color, 40%);
+            border: 0;
+            margin: 0 10px 0 0;
+            padding: 5px 10px;
+            border-radius: 4px;
+
+            -webkit-transition: background 0.2s ease-in-out;
+            -moz-transition: background 0.2s ease-in-out;
+            transition: background 0.2s ease-in-out;
+
+
+            &:hover {
+                background: lighten($color, 5%);
+            }
+
+            &:active {
+                position: relative;
+                top: 1px;
+            }
+        }
+    }
+
     .status {
         background: #7BB87B;
         text-shadow: 1px 1px 1px darken(#7BB87B, 20%);
@@ -34,9 +93,20 @@ body {
     .result {
         border: 1px solid silver;
         background: white;
+        box-shadow: 1px 1px 4px rgba(0,0,0, 0.15);
 
         color: #444;
         margin: 10px 0;
+
+        &.no_output {
+            font-style: italic;
+            color: #888;
+            padding: 10px;
+        }
+
+        .line {
+            font-family: monospace;
+        }
 
         .value {
             margin: 5px;
@@ -55,6 +125,12 @@ body {
                     font-weight: bold;
                     content: '"';
                 }
+
+                &.key {
+                    &:before {
+                        content: "";
+                    }
+                }
             }
 
             &.boolean {
@@ -65,9 +141,29 @@ body {
                 color: #5076A0;
             }
 
+            &.function, &.recursion {
+                color: #888;
+                font-style: italic;
+            }
+
+            .recursion {
+                &:before {
+                    content: "(recursion) ";
+                    font-style: normal;
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+            }
+
+
             &.key {
                 margin-right: 0;
                 padding-right: 0;
+                &:after {
+                    content: ": ";
+                    font-weight: bold;
+                    color: #444;
+                }
             }
 
             &:hover {
@@ -130,6 +226,19 @@ body {
         .queries {
             font-family: monospace;
             background: #ddd;
+            border: 1px solid white;
+
+            &:before {
+                content: "Queries:";
+                display: block;
+                background: darken(#ddd, 10%);
+                border-bottom: 1px solid #B4B4B4;
+                text-shadow: 1px 1px 0 #ddd;
+                font-size: 12px;
+                padding: 5px;
+                font-family: sans-serif;
+            }
+
             .query {
                 padding: 5px;
             }

@@ -28,14 +28,13 @@ class Lapis.Editor
       .text(msg)
 
   expand_object: (el) =>
-    obj = el.data "object"
+    tuples = el.data "tuples"
     el.empty().removeClass("expandable").addClass("expanded")
 
     el.append "<div class='closable'>{</div>"
-    for k,v of obj
+    for [k,v] in tuples
       $('<div class="tuple"></div>')
         .append(@render_value(k).addClass "key")
-        .append("<span class='sep'>: </span>")
         .append(@render_value v)
         .appendTo el
 
@@ -47,17 +46,18 @@ class Lapis.Editor
   render_value: (val) =>
     val_el = $('<div class="value"></div>')
 
-    t = typeof val
-    if t == "object"
+    [type, content] = val
+
+    if type == "table"
       val_el.text("{ ... }")
         .addClass("object expandable")
-        .data("object", val)
+        .data("tuples", content)
     else
       val_el
-        .addClass(t)
-        .text(val)
+        .addClass(type)
+        .text(content)
 
-    val_el.attr "title", t
+    val_el.attr "title", type
     val_el
 
   render_result: (res) =>
@@ -83,6 +83,12 @@ class Lapis.Editor
         .text(q)
         .appendTo queries_el
 
+    if !res.queries[0]
+      queries_el.remove()
+
+    if !res.queries[0] && !res.lines[0]
+      row.addClass("no_output").text "No output"
+
     @log.prepend row
 
   constructor: (el) ->
@@ -95,6 +101,7 @@ class Lapis.Editor
       lineNumbers: true
       tabSize: 2
       theme: "moon"
+      viewportMargin: Infinity
     }
 
     run_handler = =>
