@@ -161,6 +161,7 @@ body {
                 padding-right: 0;
                 &:after {
                     content: ": ";
+                    font-style: normal;
                     font-weight: bold;
                     color: #444;
                 }
