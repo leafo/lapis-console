@@ -1,3 +1,5 @@
+local json = require("cjson")
+json.encode_max_depth(1000)
 local lapis = require("lapis.init")
 local config = require("lapis.config").get()
 local respond_to, capture_errors, capture_errors_json, assert_error, yield_error
@@ -28,11 +30,14 @@ raw_tostring = function(o)
   end
 end
 local encode_value
-encode_value = function(val, seen)
+encode_value = function(val, seen, depth)
   if seen == nil then
-    seen = nil
+    seen = { }
   end
-  seen = seen or { }
+  if depth == nil then
+    depth = 0
+  end
+  depth = depth + 1
   local t = type(val)
   local _exp_0 = t
   if "table" == _exp_0 then
@@ -48,8 +53,8 @@ encode_value = function(val, seen)
       local _len_0 = 1
       for k, v in pairs(val) do
         _accum_0[_len_0] = {
-          encode_value(k, seen),
-          encode_value(v, seen)
+          encode_value(k, seen, depth),
+          encode_value(v, seen, depth)
         }
         _len_0 = _len_0 + 1
       end
@@ -63,7 +68,7 @@ encode_value = function(val, seen)
             "metatable",
             "metatable"
           },
-          encode_value(meta, seen)
+          encode_value(meta, seen, depth)
         })
       end
     end

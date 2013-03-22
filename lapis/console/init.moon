@@ -1,3 +1,5 @@
+json = require "cjson"
+json.encode_max_depth 1000
 
 lapis = require "lapis.init"
 config = require"lapis.config".get!
@@ -18,9 +20,8 @@ raw_tostring = (o) ->
   else
     tostring o
 
-encode_value = (val, seen=nil) ->
-  seen or= {}
-
+encode_value = (val, seen={}, depth=0) ->
+  depth += 1
   t = type val
   switch t
     when "table"
@@ -30,12 +31,12 @@ encode_value = (val, seen=nil) ->
       seen[val] = true
 
       tuples = for k,v in pairs val
-        { encode_value(k, seen), encode_value(v, seen) }
+        { encode_value(k, seen, depth), encode_value(v, seen, depth) }
 
       if meta = getmetatable val
         insert tuples, {
           { "metatable", "metatable" }
-          encode_value meta, seen
+          encode_value meta, seen, depth
         }
 
       { t, tuples }
