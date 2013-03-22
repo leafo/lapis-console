@@ -128,7 +128,8 @@ make = function(opts)
   if opts == nil then
     opts = { }
   end
-  if not (config._name == "development") then
+  opts.env = opts.env or "development"
+  if not (config._name == opts.env or opts.env == "all") then
     return function()
       return {
         status = 404,

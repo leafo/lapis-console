@@ -69,7 +69,9 @@ run = (fn using nil) ->
   lines, queries
 
 make = (opts={}) ->
-  unless config._name == "development"
+  opts.env or= "development"
+
+  unless config._name == opts.env or opts.env == "all"
     return -> status: 404, layout: false
   
   view = require"lapis.console.views.console"
