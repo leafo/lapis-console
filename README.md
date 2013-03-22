@@ -1,4 +1,4 @@
-# Lapis console
+# Lapis Console
 
 An interactive console for the [Lapis][1] web framework.
 
@@ -40,11 +40,35 @@ you system so be careful.
 The console is only accessable in the `"development"` environment. It will
 return a 404 if accessed in any other environment.
 
-  [1]: https://github.com/leafo/lapis
+## Building
+
+Uses [Tup][2], the build system.
+
+```bash
+$ tup init
+$ tup upd
+```
 
 # Contact
 
 Author: Leaf Corcoran (leafo) ([@moonscript](http://twitter.com/moonscript))  
 Email: leafot@gmail.com  
 Homepage: <http://leafo.net>  
+License: MIT
+
+# License
+
+Lapis Console includes the following libraries:
+
+```
+jQuery v1.9.1 | (c) 2005, 2012 jQuery Foundation, Inc. | jquery.org/license
+```
+
+```
+CodeMirror 3.1 Copyright (C) 2013 by Marijn Haverbeke <marijnh@gmail.com>
+```
+
+  [1]: https://github.com/leafo/lapis
+  [2]: http://gittup.org/tup/
+
 
