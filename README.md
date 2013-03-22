@@ -17,7 +17,7 @@ $ lapis server development
 
 Hit <http://localhost:8080/console>
 
-![Screenshot](http://leafo.net/shotsnb/2013-03-21_23-11-51.png)
+![Screenshot](http://leafo.net/dump/lapis_console.png)
 
 ## Tips
 
