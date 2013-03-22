@@ -4,8 +4,8 @@ An interactive console for the [Lapis][1] web framework.
 
 ```moonscript
 -- web.moon
-lapis = require "lapis.init"
-console = require "lapis.console.init"
+lapis = require "lapis"
+console = require "lapis.console"
 
 lapis.serve class extends lapis.Application
   "/console": console.make!
