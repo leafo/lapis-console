@@ -49,7 +49,8 @@ run = (fn using nil) ->
 
   scope = setmetatable {
     print: (...) ->
-      insert lines, [ encode_value v for v in *{...} ]
+      count = select "#", ...
+      insert lines, [ encode_value (select i, ...) for i=1,count]
   }, __index: _G
 
   db = require "lapis.db"

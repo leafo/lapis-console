@@ -56,7 +56,7 @@ return [==[
 
     Editor.prototype.render_value = function(val) {
       var content, has_content, type, val_el;
-      val_el = $('<div class="value"></div>');
+      val_el = $('<pre class="value"></pre>');
       type = val[0], content = val[1];
       if (type === "table") {
         has_content = content.length > 0;

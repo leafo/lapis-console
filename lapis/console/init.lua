@@ -89,15 +89,12 @@ run = function(fn)
   local queries = { }
   local scope = setmetatable({
     print = function(...)
+      local count = select("#", ...)
       return insert(lines, (function(...)
         local _accum_0 = { }
         local _len_0 = 1
-        local _list_0 = {
-          ...
-        }
-        for _index_0 = 1, #_list_0 do
-          local v = _list_0[_index_0]
-          _accum_0[_len_0] = encode_value(v)
+        for i = 1, count do
+          _accum_0[_len_0] = encode_value((select(i, ...)))
           _len_0 = _len_0 + 1
         end
         return _accum_0

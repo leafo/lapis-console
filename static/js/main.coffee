@@ -44,7 +44,7 @@ class Lapis.Editor
     el.text("{ ... }").removeClass("expanded").addClass "expandable"
 
   render_value: (val) =>
-    val_el = $('<div class="value"></div>')
+    val_el = $('<pre class="value"></pre>')
 
     [type, content] = val
 
