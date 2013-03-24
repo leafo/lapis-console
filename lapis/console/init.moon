@@ -43,11 +43,12 @@ encode_value = (val, seen={}, depth=0) ->
     else
       { t, raw_tostring val }
 
-run = (fn using nil) ->
+run = (self, fn using nil) ->
   lines = {}
   queries = {}
 
   scope = setmetatable {
+    :self
     print: (...) ->
       count = select "#", ...
       insert lines, [ encode_value (select i, ...) for i=1,count]
@@ -94,7 +95,7 @@ make = (opts={}) ->
         if err
           { json: { error: err } }
         else
-          lines, queries = run fn
+          lines, queries = run @, fn
           if lines
             { json: { :lines, :queries } }
           else

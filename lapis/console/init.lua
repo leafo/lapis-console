@@ -84,10 +84,11 @@ encode_value = function(val, seen, depth)
   end
 end
 local run
-run = function(fn)
+run = function(self, fn)
   local lines = { }
   local queries = { }
   local scope = setmetatable({
+    self = self,
     print = function(...)
       local count = select("#", ...)
       return insert(lines, (function(...)
@@ -167,7 +168,7 @@ make = function(opts)
             }
           }
         else
-          local lines, queries = run(fn)
+          local lines, queries = run(self, fn)
           if lines then
             return {
               json = {
