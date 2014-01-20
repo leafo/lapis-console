@@ -4,11 +4,7 @@ json.encode_max_depth 1000
 lapis = require "lapis.init"
 config = require"lapis.config".get!
 
-{
-  :respond_to, :capture_errors, :capture_errors_json, :assert_error,
-  :yield_error
-} = require "lapis.application"
-
+import respond_to, capture_errors_json from require "lapis.application"
 import assert_valid from require "lapis.validate"
 import insert from table
 

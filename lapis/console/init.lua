@@ -2,17 +2,21 @@ local json = require("cjson")
 json.encode_max_depth(1000)
 local lapis = require("lapis.init")
 local config = require("lapis.config").get()
-local respond_to, capture_errors, capture_errors_json, assert_error, yield_error
+local respond_to, capture_errors_json
 do
   local _obj_0 = require("lapis.application")
-  respond_to, capture_errors, capture_errors_json, assert_error, yield_error = _obj_0.respond_to, _obj_0.capture_errors, _obj_0.capture_errors_json, _obj_0.assert_error, _obj_0.yield_error
+  respond_to, capture_errors_json = _obj_0.respond_to, _obj_0.capture_errors_json
 end
 local assert_valid
 do
-  local _table_0 = require("lapis.validate")
-  assert_valid = _table_0.assert_valid
+  local _obj_0 = require("lapis.validate")
+  assert_valid = _obj_0.assert_valid
 end
-local insert = table.insert
+local insert
+do
+  local _obj_0 = table
+  insert = _obj_0.insert
+end
 local raw_tostring
 raw_tostring = function(o)
   do
@@ -48,7 +52,8 @@ encode_value = function(val, seen, depth)
       }
     end
     seen[val] = true
-    local tuples = (function()
+    local tuples
+    do
       local _accum_0 = { }
       local _len_0 = 1
       for k, v in pairs(val) do
@@ -58,8 +63,8 @@ encode_value = function(val, seen, depth)
         }
         _len_0 = _len_0 + 1
       end
-      return _accum_0
-    end)()
+      tuples = _accum_0
+    end
     do
       local meta = getmetatable(val)
       if meta then

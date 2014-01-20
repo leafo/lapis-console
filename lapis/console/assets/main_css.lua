@@ -27,7 +27,7 @@ body {
   margin-bottom: 7px; }
   #editor .buttons_top button {
     font-size: 16px;
-    background: #8aa8cf;
+    background: #8AA8CF;
     color: #294464;
     border: 0;
     margin: 0 10px 0 0;

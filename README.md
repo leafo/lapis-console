@@ -27,17 +27,16 @@ get an interactive version that you can open and close in the browser. Just
 click on the bold `{ ... }` to open the table up.
 
 Any SQL queries that take place when running the code you submit will also be
-captured and printed as part of the result. Good for debugging what those
-active record functions are actually doing.
+captured and printed as part of the result.
 
 The input field is a full multi-line text editor. You can write an entire
 program in it.
 
-The code that runs is not restricted in any way. So if you do `while true` it
-will run forever. Also if someone bad gets access to it they can do damage to
-you system so be careful.
+The code that runs is not restricted in any way. If you run `while true` it
+will run forever. If someone malicious gets access to it then they can do
+damage to you system.
 
-The console is only accessable in the `"development"` environment. It will
+The console is only accessible in the `"development"` environment. It will
 return a 404 if accessed in any other environment.
 
 ## Building
