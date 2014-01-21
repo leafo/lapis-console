@@ -1,6 +1,17 @@
 window.Lapis ||= {}
 
+debounce = (fn, time) ->
+  t = null
+  (args...) ->
+    clearTimeout t if t
+    t = setTimeout ->
+      t = null
+      fn args...
+    , time
+
 class Lapis.Editor
+  session_name: "lapis-console-session"
+
   run_code: (code, fn) ->
     if @last_line_handle
       @editor.removeLineClass @last_line_handle, "background", "has_error"
@@ -95,6 +106,16 @@ class Lapis.Editor
 
     @log.prepend row
 
+  save_session: =>
+    console.log "saved_session"
+    return unless window.sessionStorage
+    window.sessionStorage.setItem @session_name, @editor.getValue()
+
+  load_session: =>
+    return unless window.sessionStorage
+    prev_value = window.sessionStorage.getItem @session_name
+    @editor.setValue prev_value if prev_value
+
   constructor: (el) ->
     @el = $ el
     @log = @el.find ".log"
@@ -107,6 +128,10 @@ class Lapis.Editor
       theme: "moon"
       viewportMargin: Infinity
     }
+
+    @editor.on "change", debounce =>
+      @save_session()
+    , 500
 
     run_handler = =>
       @run_code @editor.getValue(), (res) =>
@@ -133,4 +158,6 @@ class Lapis.Editor
 
     @log.on "click", ".closable", (e) =>
       @close_object $(e.currentTarget).closest ".object"
+
+    @load_session()
 
