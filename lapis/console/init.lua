@@ -92,20 +92,22 @@ local run
 run = function(self, fn)
   local lines = { }
   local queries = { }
+  local console_print
+  console_print = function(...)
+    local count = select("#", ...)
+    return insert(lines, (function(...)
+      local _accum_0 = { }
+      local _len_0 = 1
+      for i = 1, count do
+        _accum_0[_len_0] = encode_value((select(i, ...)))
+        _len_0 = _len_0 + 1
+      end
+      return _accum_0
+    end)(...))
+  end
   local scope = setmetatable({
     self = self,
-    print = function(...)
-      local count = select("#", ...)
-      return insert(lines, (function(...)
-        local _accum_0 = { }
-        local _len_0 = 1
-        for i = 1, count do
-          _accum_0[_len_0] = encode_value((select(i, ...)))
-          _len_0 = _len_0 + 1
-        end
-        return _accum_0
-      end)(...))
-    end
+    print = console_print
   }, {
     __index = _G
   })
@@ -120,9 +122,14 @@ run = function(self, fn)
     end
   })
   setfenv(fn, scope)
+  local old_console = console
+  console = {
+    print = console_print
+  }
   local ret = {
     pcall(fn)
   }
+  console = old_console
   if not (ret[1]) then
     return unpack(ret, 1, 2)
   end

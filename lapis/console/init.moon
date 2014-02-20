@@ -43,11 +43,13 @@ run = (self, fn using nil) ->
   lines = {}
   queries = {}
 
+  console_print = (...) ->
+    count = select "#", ...
+    insert lines, [ encode_value (select i, ...) for i=1,count]
+
   scope = setmetatable {
     :self
-    print: (...) ->
-      count = select "#", ...
-      insert lines, [ encode_value (select i, ...) for i=1,count]
+    print: console_print
   }, __index: _G
 
   db = require "lapis.db"
@@ -59,7 +61,12 @@ run = (self, fn using nil) ->
   }
 
   setfenv fn, scope
+  old_console = console
+  export console = {
+    print: console_print
+  }
   ret = { pcall fn }
+  export console = old_console
   return unpack ret, 1, 2 unless ret[1]
 
   db.set_logger old_logger
