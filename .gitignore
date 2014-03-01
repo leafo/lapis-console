@@ -3,3 +3,4 @@ logs/
 nginx.conf.compiled
 secret/
 cache/
+lint_config.lua
