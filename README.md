@@ -48,6 +48,13 @@ $ tup init
 $ tup upd
 ```
 
+On UNIX or Linux systems, you might need to remove the `.lua` source
+files first to get `tup` to build properly:
+
+```bash
+$ find . -name "*.lua" -exec rm {} \;
+```
+
 # Contact
 
 Author: Leaf Corcoran (leafo) ([@moonscript](http://twitter.com/moonscript))  
