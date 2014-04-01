@@ -1,7 +1,7 @@
 json = require "cjson"
 json.encode_max_depth 1000
 
-VERSION = "0.1.0"
+VERSION = "1.0.0"
 
 lapis = require "lapis.init"
 config = require"lapis.config".get!
