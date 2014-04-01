@@ -1,4 +1,4 @@
-package = "lapis_console"
+package = "lapis-console"
 version = "dev-1"
 
 source = {

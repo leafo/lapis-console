@@ -1,6 +1,8 @@
 json = require "cjson"
 json.encode_max_depth 1000
 
+VERSION = "0.1.0"
+
 lapis = require "lapis.init"
 config = require"lapis.config".get!
 
@@ -106,5 +108,5 @@ make = (opts={}) ->
   }
 
 
-{ :make, :encode_value, :run, :raw_tostring }
+{ :make, :encode_value, :run, :raw_tostring, :VERSION }
 

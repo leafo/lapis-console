@@ -38,7 +38,7 @@ do
         })
         return div({
           class = "footer"
-        }, "lapis_console 0.0.1")
+        }, "lapis-console " .. tostring(require("lapis.console").VERSION))
       end)
     end,
     content = function(self)

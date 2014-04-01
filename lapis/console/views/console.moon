@@ -18,7 +18,7 @@ class Console extends Widget
         div class: "status", "Ready"
 
       div class: "log"
-      div class: "footer", "lapis_console 0.0.1"
+      div class: "footer", "lapis-console #{require("lapis.console").VERSION}"
 
 
   content: =>
