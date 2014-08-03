@@ -54,13 +54,11 @@ run = (self, fn using nil) ->
     print: console_print
   }, __index: _G
 
-  db = require "lapis.db"
-  old_logger = db.get_logger!
-  db.set_logger {
-    query: (q) ->
-      insert queries, q
-      old_logger.query q if old_logger
-  }
+  logger = require "lapis.logging"
+  old_query_logger = logger.query
+  logger.query = (q) ->
+    insert queries, q
+    old_query_logger q
 
   setfenv fn, scope
   old_console = console
@@ -71,7 +69,8 @@ run = (self, fn using nil) ->
   export console = old_console
   return unpack ret, 1, 2 unless ret[1]
 
-  db.set_logger old_logger
+  logger.query = old_query_logger
+
   lines, queries
 
 make = (opts={}) ->

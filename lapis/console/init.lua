@@ -112,16 +112,12 @@ run = function(self, fn)
   }, {
     __index = _G
   })
-  local db = require("lapis.db")
-  local old_logger = db.get_logger()
-  db.set_logger({
-    query = function(q)
-      insert(queries, q)
-      if old_logger then
-        return old_logger.query(q)
-      end
-    end
-  })
+  local logger = require("lapis.logging")
+  local old_query_logger = logger.query
+  logger.query = function(q)
+    insert(queries, q)
+    return old_query_logger(q)
+  end
   setfenv(fn, scope)
   local old_console = console
   console = {
@@ -134,7 +130,7 @@ run = function(self, fn)
   if not (ret[1]) then
     return unpack(ret, 1, 2)
   end
-  db.set_logger(old_logger)
+  logger.query = old_query_logger
   return lines, queries
 end
 local make
