@@ -1,8 +1,5 @@
 local Widget
-do
-  local _obj_0 = require("lapis.html")
-  Widget = _obj_0.Widget
-end
+Widget = require("lapis.html").Widget
 local embed_assets = true
 local Console
 do

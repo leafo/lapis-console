@@ -9,15 +9,9 @@ do
   respond_to, capture_errors_json = _obj_0.respond_to, _obj_0.capture_errors_json
 end
 local assert_valid
-do
-  local _obj_0 = require("lapis.validate")
-  assert_valid = _obj_0.assert_valid
-end
+assert_valid = require("lapis.validate").assert_valid
 local insert
-do
-  local _obj_0 = table
-  insert = _obj_0.insert
-end
+insert = table.insert
 local raw_tostring
 raw_tostring = function(o)
   do
