@@ -3,11 +3,11 @@
 An interactive console for the [Lapis][1] web framework.
 
 ```moonscript
--- web.moon
+-- app.moon
 lapis = require "lapis"
 console = require "lapis.console"
 
-lapis.serve class extends lapis.Application
+class extends lapis.Application
   "/console": console.make!
 ```
 
