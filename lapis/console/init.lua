@@ -187,6 +187,31 @@ make = function(opts)
             }
           end
         end
+      elseif self.params.lang == "lua" then
+        local fn, err = loadstring(self.params.code)
+        if err then
+          return {
+            json = {
+              error = err
+            }
+          }
+        else
+          local lines, queries = run(self, fn)
+          if lines then
+            return {
+              json = {
+                lines = lines,
+                queries = queries
+              }
+            }
+          else
+            return {
+              json = {
+                error = queries
+              }
+            }
+          end
+        end
       end
     end)
   })

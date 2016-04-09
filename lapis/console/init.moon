@@ -104,6 +104,16 @@ make = (opts={}) ->
             { json: { :lines, :queries } }
           else
             { json: { error: queries } }
+      elseif @params.lang == "lua"
+        fn, err = loadstring @params.code
+        if err
+          { json: { error: err } }
+        else
+          lines, queries = run @, fn
+          if lines
+            { json: { :lines, :queries } }
+          else
+            { json: { error: queries } }
   }
 
 

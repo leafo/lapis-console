@@ -4,3 +4,4 @@ nginx.conf.compiled
 secret/
 cache/
 lint_config.lua
+.DS_Store
