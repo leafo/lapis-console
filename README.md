@@ -37,7 +37,8 @@ will run forever. If someone malicious gets access to it then they can do
 damage to you system.
 
 The console is only accessible in the `"development"` environment. It will
-return a 404 if accessed in any other environment.
+return a 404 if accessed in any other environment. You can bypass this protection
+by passing `{env = "all"}` as the first argument of `make_console`.
 
 ## Building
 
