@@ -33,6 +33,7 @@ return [==[
       }
       opts = $.param({
         lang: "moonscript"
+        // lang: "lua"
       });
       this.set_status("loading", "Loading...");
       return $.post("?" + opts, {
