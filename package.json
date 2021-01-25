@@ -1,0 +1,20 @@
+{
+  "name": "lapis-console",
+  "version": "1.0.0",
+  "description": "An interactive console for the Lapis web framework.",
+  "main": "index.js",
+  "dependencies": {
+    "coffeescript": "^1.9.2"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leafo/lapis-console.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/leafo/lapis-console/issues"
+  },
+  "homepage": "https://github.com/leafo/lapis-console#readme"
+}
