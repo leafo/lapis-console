@@ -7,28 +7,33 @@ body {
 
 #editor .CodeMirror {
   height: auto; }
+
 #editor .CodeMirror-scroll {
   overflow-y: hidden;
   overflow-x: auto; }
+
 #editor .editor_top {
   background: whitesmoke;
   padding: 20px;
   border-bottom: 1px solid #B1AFAF;
   box-shadow: 0 -2px 4px 4px rgba(0, 0, 0, 0.15); }
+
 #editor .log {
   padding: 0 20px; }
+
 #editor .footer {
   text-align: center;
   margin: 10px;
   font-size: 12px;
   color: #838383; }
+
 #editor .buttons_top {
   font-size: 0;
   margin-bottom: 7px; }
   #editor .buttons_top button {
     font-size: 16px;
     background: #8AA8CF;
-    color: #294464;
+    color: #294364;
     border: 0;
     margin: 0 10px 0 0;
     padding: 5px 10px;
@@ -37,10 +42,11 @@ body {
     -moz-transition: background 0.2s ease-in-out;
     transition: background 0.2s ease-in-out; }
     #editor .buttons_top button:hover {
-      background: #9cb6d6; }
+      background: #9cb5d6; }
     #editor .buttons_top button:active {
       position: relative;
       top: 1px; }
+
 #editor .status {
   background: #7BB87B;
   text-shadow: 1px 1px 1px #488548;
@@ -54,9 +60,11 @@ body {
     text-shadow: 1px 1px 1px #a73b3b; }
   #editor .status.loading {
     background: #E9D674;
-    text-shadow: 1px 1px 1px #a9911b; }
+    text-shadow: 1px 1px 1px #a9921b; }
+
 #editor .has_error {
   background: rgba(255, 0, 0, 0.2); }
+
 #editor .result {
   border: 1px solid silver;
   background: white;
