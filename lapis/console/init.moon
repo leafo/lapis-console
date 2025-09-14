@@ -56,8 +56,12 @@ run = (self, fn using nil) ->
 
   logger = require "lapis.logging"
   old_query_logger = logger.query
+  current_ctx = ngx and ngx.ctx
+
   logger.query = (q) ->
-    insert queries, q
+    if (ngx and ngx.ctx) == current_ctx
+      insert queries, q
+
     old_query_logger q
 
   setfenv fn, scope

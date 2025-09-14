@@ -108,8 +108,11 @@ run = function(self, fn)
   })
   local logger = require("lapis.logging")
   local old_query_logger = logger.query
+  local current_ctx = ngx and ngx.ctx
   logger.query = function(q)
-    insert(queries, q)
+    if (ngx and ngx.ctx) == current_ctx then
+      insert(queries, q)
+    end
     return old_query_logger(q)
   end
   setfenv(fn, scope)
