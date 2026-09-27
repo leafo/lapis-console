@@ -54,6 +54,7 @@ committed so the rock can be installed without Node.
 $ npm install
 $ make build   # bundle assets and compile MoonScript
 $ make local   # install the rock locally with LuaRocks
+$ make test    # run the specs with busted
 ```
 
 # Contact

@@ -1,0 +1,58 @@
+name: test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        # the console uses setfenv, so it's limited to Lua 5.1 and LuaJIT
+        luaVersion: ["5.1", "luajit-openresty"]
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+
+    - uses: leafo/gh-actions-lua@master
+      with:
+        luaVersion: ${{ matrix.luaVersion }}
+
+    - uses: leafo/gh-actions-luarocks@master
+
+    - name: build
+      run: |
+        luarocks install busted
+        luarocks make
+
+    - name: test
+      run: |
+        busted -o utfTerminal
+
+  # checks that the committed .lua files match their MoonScript and JavaScript sources
+  generated:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+
+    - uses: leafo/gh-actions-lua@master
+      with:
+        luaVersion: "luajit-openresty"
+
+    - uses: leafo/gh-actions-luarocks@master
+
+    - name: build
+      run: |
+        luarocks install moonscript
+        npm ci
+        make build
+
+    - name: check generated files
+      run: |
+        git diff --exit-code

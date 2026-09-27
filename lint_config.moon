@@ -143,6 +143,10 @@ html_builer = {
   whitelist_globals: {
     ["."]: {"ngx"}
     ["lapis/console/views"]: html_builer
+    ["spec/"]: {
+      "describe", "it", "before_each", "after_each", "setup", "teardown"
+      "assert", "spy", "stub", "mock"
+    }
   }
 }
 
