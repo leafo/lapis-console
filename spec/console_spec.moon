@@ -35,6 +35,11 @@ describe "lapis.console", ->
       assert.same {"string", "self"}, tuples[1][1]
       assert.same "recursion", tuples[1][2][1]
 
+    it "sorts keys by type then value", ->
+      {_, tuples} = encode_value { "a", "b", z: 1, y: 2, [10]: 3, [true]: 4 }
+      keys = [k[2] for {k} in *tuples]
+      assert.same {"1", "2", "10", "y", "z", "true"}, keys
+
     it "includes the metatable", ->
       meta = { name: "meta" }
       {_, tuples} = encode_value setmetatable {}, meta
@@ -46,39 +51,65 @@ describe "lapis.console", ->
     logger = require "lapis.logging"
 
     it "captures printed values from moonscript", ->
-      lines, queries = run {}, "print 1, 'two'\nprint!"
+      result = run {}, "print 1, 'two'\nprint!"
       assert.same {
         { {"number", "1"}, {"string", "two"} }
         {}
-      }, lines
-      assert.same {}, queries
+      }, result.lines
+      assert.same {}, result.queries
+      assert.is_nil result.returns
+      assert.is_nil result.error
+      assert.number result.time
 
     it "captures printed values from lua", ->
-      lines = run {}, "print(1, 'two')", "lua"
+      result = run {}, "print(1, 'two')", "lua"
       assert.same {
         { {"number", "1"}, {"string", "two"} }
-      }, lines
+      }, result.lines
 
     it "captures console.print", ->
-      lines = run {}, "console.print 'hi'"
-      assert.same { { {"string", "hi"} } }, lines
+      result = run {}, "console.print 'hi'"
+      assert.same { { {"string", "hi"} } }, result.lines
 
-    it "captures queries", ->
+    it "captures queries with their duration", ->
       old_query = logger.query
       logger.query = -> -- silence the default query logger
 
-      _, queries = run {}, "require('lapis.logging').query 'select 1'"
+      result = run {}, "logger = require 'lapis.logging'\nlogger.query 'select 1', 0.5\nlogger.query 'select 2'"
 
       logger.query = old_query
-      assert.same {"select 1"}, queries
+      assert.same {
+        { query: "select 1", duration: 0.5 }
+        { query: "select 2" }
+      }, result.queries
 
     it "exposes self", ->
-      lines = run { name: "the request" }, "print self.name"
-      assert.same { { {"string", "the request"} } }, lines
+      result = run { name: "the request" }, "print self.name"
+      assert.same { { {"string", "the request"} } }, result.lines
 
     it "doesn't leak assignments into globals", ->
       run {}, "export leaked_global = 1"
       assert.is_nil _G.leaked_global
+
+    describe "return values", ->
+      it "returns the last moonscript expression", ->
+        result = run {}, "x = 5\nx * 2, nil, 'a'"
+        assert.same {
+          {"number", "10"}, {"nil", "nil"}, {"string", "a"}
+        }, result.returns
+
+      it "returns a lua expression", ->
+        result = run {}, "1 + 1", "lua"
+        assert.same { {"number", "2"} }, result.returns
+
+      it "runs lua statements", ->
+        result = run {}, "local x = 2\nprint(x)", "lua"
+        assert.same { { {"number", "2"} } }, result.lines
+        assert.is_nil result.returns
+
+      it "returns explicit lua returns", ->
+        result = run {}, "local x = 2\nreturn x, x * 2", "lua"
+        assert.same { {"number", "2"}, {"number", "4"} }, result.returns
 
     it "returns syntax errors", ->
       ok, err = run {}, "x = (("
@@ -92,15 +123,22 @@ describe "lapis.console", ->
     it "returns an error for an unknown language", ->
       assert.same {nil, "unknown language: php"}, {run {}, "1", "php"}
 
-    it "returns runtime errors and restores globals", ->
+    it "returns runtime errors with output and restores globals", ->
       old_query = logger.query
       old_console = _G.console
 
-      ok, err = run {}, "error('boom')", "lua"
-      assert.is_nil ok
-      assert.same "console:1: boom", err
+      result = run {}, "print(1)\nerror('boom')", "lua"
+      assert.same "console:2: boom", result.error
+      assert.same { { {"number", "1"} } }, result.lines
       assert.equal old_query, logger.query
       assert.equal old_console, _G.console
+
+    it "returns a traceback without the console's frames", ->
+      result = run {}, "f = -> error 'deep'\nf!"
+      assert.truthy result.traceback\match "^stack traceback:"
+      assert.truthy result.traceback\find "moonscript.loadstring", 1, true
+      assert.falsy result.traceback\find "xpcall", 1, true
+      assert.falsy result.traceback\find "lapis/console", 1, true
 
   describe "make", ->
     local app

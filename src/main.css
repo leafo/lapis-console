@@ -26,6 +26,10 @@
   --queries-border: white;
   --queries-header-bg: #c4c4c4;
   --queries-header-border: #b4b4b4;
+
+  --error-bg: rgba(194, 83, 83, 0.08);
+  --error-border: #c25353;
+  --error-fg: #a73b3b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -55,6 +59,10 @@
     --queries-border: #3a3a3a;
     --queries-header-bg: #303030;
     --queries-header-border: #3a3a3a;
+
+    --error-bg: rgba(194, 83, 83, 0.12);
+    --error-border: #c25353;
+    --error-fg: #eb9a9a;
   }
 }
 
@@ -144,7 +152,7 @@ body {
     color: var(--result-fg);
     margin: 10px 0;
 
-    &.no_output {
+    .no_output {
       font-style: italic;
       color: var(--muted-fg);
       padding: 10px;
@@ -152,6 +160,49 @@ body {
 
     .line {
       font-family: monospace;
+
+      &.returns::before {
+        content: "\21D2";
+        display: inline-block;
+        vertical-align: top;
+        padding: 10px 0 0 10px;
+        color: var(--muted-fg);
+      }
+    }
+
+    .result_error {
+      margin: 5px;
+      padding: 5px 10px;
+      background: var(--error-bg);
+      border-left: 3px solid var(--error-border);
+
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+      }
+
+      .message {
+        color: var(--error-fg);
+      }
+
+      summary {
+        cursor: pointer;
+        margin-top: 5px;
+        font-size: 13px;
+        color: var(--muted-fg);
+      }
+
+      .traceback {
+        font-size: 12px;
+        margin-top: 5px;
+      }
+    }
+
+    .time {
+      text-align: right;
+      font-size: 11px;
+      padding: 2px 6px;
+      color: var(--muted-fg);
     }
 
     .value {
@@ -273,7 +324,19 @@ body {
       }
 
       .query {
+        display: flex;
+        gap: 10px;
         padding: 5px;
+
+        .sql {
+          flex: 1;
+          white-space: pre-wrap;
+        }
+
+        .duration {
+          white-space: nowrap;
+          color: var(--muted-fg);
+        }
       }
     }
   }

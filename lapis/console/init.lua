@@ -8,8 +8,23 @@ end
 local assert_valid
 assert_valid = require("lapis.validate").assert_valid
 local csrf = require("lapis.csrf")
-local insert
-insert = table.insert
+local insert, sort
+do
+  local _obj_0 = table
+  insert, sort = _obj_0.insert, _obj_0.sort
+end
+local gettime
+do
+  local ok, socket = pcall(require, "socket")
+  gettime = ok and socket.gettime or os.clock
+end
+local pack
+pack = function(...)
+  return {
+    n = select("#", ...),
+    ...
+  }
+end
 local raw_tostring
 raw_tostring = function(o)
   do
@@ -26,15 +41,27 @@ raw_tostring = function(o)
     end
   end
 end
+local key_type_order = {
+  number = 1,
+  string = 2
+}
+local compare_keys
+compare_keys = function(a, b)
+  local ta, tb = type(a), type(b)
+  if ta == tb and key_type_order[ta] then
+    return a < b
+  end
+  local oa, ob = key_type_order[ta] or 3, key_type_order[tb] or 3
+  if oa ~= ob then
+    return oa < ob
+  end
+  return raw_tostring(a) < raw_tostring(b)
+end
 local encode_value
-encode_value = function(val, seen, depth)
+encode_value = function(val, seen)
   if seen == nil then
     seen = { }
   end
-  if depth == nil then
-    depth = 0
-  end
-  depth = depth + 1
   local t = type(val)
   local _exp_0 = t
   if "table" == _exp_0 then
@@ -45,14 +72,26 @@ encode_value = function(val, seen, depth)
       }
     end
     seen[val] = true
+    local keys
+    do
+      local _accum_0 = { }
+      local _len_0 = 1
+      for k in pairs(val) do
+        _accum_0[_len_0] = k
+        _len_0 = _len_0 + 1
+      end
+      keys = _accum_0
+    end
+    sort(keys, compare_keys)
     local tuples
     do
       local _accum_0 = { }
       local _len_0 = 1
-      for k, v in pairs(val) do
+      for _index_0 = 1, #keys do
+        local k = keys[_index_0]
         _accum_0[_len_0] = {
-          encode_value(k, seen, depth),
-          encode_value(v, seen, depth)
+          encode_value(k, seen),
+          encode_value(val[k], seen)
         }
         _len_0 = _len_0 + 1
       end
@@ -66,7 +105,7 @@ encode_value = function(val, seen, depth)
             "metatable",
             "metatable"
           },
-          encode_value(meta, seen, depth)
+          encode_value(meta, seen)
         })
       end
     end
@@ -105,10 +144,31 @@ compile = function(code, lang, env)
     end
     return load_chunk(lua_code, "=(moonscript.loadstring)", env)
   elseif "lua" == _exp_0 then
-    return load_chunk(code, "=console", env)
+    do
+      local fn = load_chunk("return " .. tostring(code), "=console", env)
+      if fn then
+        return fn
+      else
+        return load_chunk(code, "=console", env)
+      end
+    end
   else
     return nil, "unknown language: " .. tostring(lang)
   end
+end
+local error_handler
+error_handler = function(err)
+  local traceback = debug.traceback("", 2):gsub("^\n", "")
+  do
+    local pos = traceback:find("\n[^\n]*xpcall")
+    if pos then
+      traceback = traceback:sub(1, pos - 1)
+    end
+  end
+  return {
+    message = tostring(err),
+    traceback = traceback
+  }
 end
 local run
 run = function(self, code, lang)
@@ -143,24 +203,46 @@ run = function(self, code, lang)
   local logger = require("lapis.logging")
   local old_query_logger = logger.query
   local current_ctx = ngx and ngx.ctx
-  logger.query = function(q)
+  logger.query = function(q, duration, ...)
     if (ngx and ngx.ctx) == current_ctx then
-      insert(queries, q)
+      insert(queries, {
+        query = q,
+        duration = duration
+      })
     end
-    return old_query_logger(q)
+    return old_query_logger(q, duration, ...)
   end
   local old_console = _G.console
   _G.console = {
     print = console_print
   }
-  local ok
-  ok, err = pcall(fn)
+  local start = gettime()
+  local res = pack(xpcall(fn, error_handler))
+  local time = gettime() - start
   _G.console = old_console
   logger.query = old_query_logger
-  if not (ok) then
-    return nil, err
+  local result = {
+    lines = lines,
+    queries = queries,
+    time = time
+  }
+  if res[1] then
+    if res.n > 1 then
+      do
+        local _accum_0 = { }
+        local _len_0 = 1
+        for i = 2, res.n do
+          _accum_0[_len_0] = encode_value(res[i])
+          _len_0 = _len_0 + 1
+        end
+        result.returns = _accum_0
+      end
+    end
+  else
+    result.error = res[2].message
+    result.traceback = res[2].traceback
   end
-  return lines, queries
+  return result
 end
 local make
 make = function(opts)
@@ -198,21 +280,12 @@ make = function(opts)
           }
         }
       })
-      local lines, queries = run(self, self.params.code, self.params.lang)
-      if lines then
-        return {
-          json = {
-            lines = lines,
-            queries = queries
-          }
+      local result, err = run(self, self.params.code, self.params.lang)
+      return {
+        json = result or {
+          error = err
         }
-      else
-        return {
-          json = {
-            error = queries
-          }
-        }
-      end
+      }
     end)
   })
 end

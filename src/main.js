@@ -62,6 +62,12 @@ function errorLineNumber(message) {
   return m && parseInt(m[1], 10)
 }
 
+function formatDuration(seconds) {
+  if (seconds >= 1) return `${seconds.toFixed(2)} s`
+  const ms = seconds * 1000
+  return `${ms.toFixed(ms < 10 ? 2 : 1)} ms`
+}
+
 function sessionGet(key) {
   try { return window.sessionStorage.getItem(key) } catch (e) { return null }
 }
@@ -154,6 +160,9 @@ export class Editor {
       return
     }
 
+    // the code ran if there's a time, even if it raised an error
+    if (res.time != null) this.renderResult(res)
+
     // capture_errors_json responds with errors, the console with error
     const error = res.error || (res.errors && asArray(res.errors).join(", "))
     if (error) {
@@ -164,7 +173,6 @@ export class Editor {
       }
     } else {
       this.setStatus("ready", "Ready")
-      this.renderResult(res)
     }
   }
 
@@ -224,30 +232,46 @@ export class Editor {
     objectEl.classList.add("expandable")
   }
 
+  renderLine(values, className) {
+    const lineEl = el("div", className)
+    for (const value of asArray(values)) lineEl.append(this.renderValue(value))
+    return lineEl
+  }
+
   renderResult(res) {
     const row = el("div", "result")
     const lines = asArray(res.lines)
+    const returns = asArray(res.returns)
     const queries = asArray(res.queries)
 
-    if (!lines.length && !queries.length) {
-      row.classList.add("no_output")
-      row.textContent = "No output"
-    } else {
-      const linesEl = el("div", "lines")
-      for (const line of lines) {
-        const lineEl = el("div", "line")
-        for (const value of asArray(line)) lineEl.append(this.renderValue(value))
-        linesEl.append(lineEl)
-      }
-      row.append(linesEl)
+    for (const line of lines) row.append(this.renderLine(line, "line"))
+    if (returns.length) row.append(this.renderLine(returns, "line returns"))
 
-      if (queries.length) {
-        const queriesEl = el("div", "queries")
-        for (const q of queries) queriesEl.append(el("div", "query", q))
-        row.append(queriesEl)
+    if (res.error) {
+      const errorEl = el("div", "result_error")
+      errorEl.append(el("pre", "message", res.error))
+      if (res.traceback) {
+        const details = el("details")
+        details.append(el("summary", null, "Traceback"), el("pre", "traceback", res.traceback))
+        errorEl.append(details)
       }
+      row.append(errorEl)
     }
 
+    if (!row.childElementCount) row.append(el("div", "no_output", "No output"))
+
+    if (queries.length) {
+      const queriesEl = el("div", "queries")
+      for (const q of queries) {
+        const queryEl = el("div", "query")
+        queryEl.append(el("span", "sql", q.query))
+        if (q.duration != null) queryEl.append(el("span", "duration", formatDuration(q.duration)))
+        queriesEl.append(queryEl)
+      }
+      row.append(queriesEl)
+    }
+
+    row.append(el("div", "time", formatDuration(res.time)))
     this.log.prepend(row)
   }
 }

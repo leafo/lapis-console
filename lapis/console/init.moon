@@ -5,7 +5,13 @@ config = require"lapis.config".get!
 import respond_to, capture_errors_json from require "lapis.application"
 import assert_valid from require "lapis.validate"
 csrf = require "lapis.csrf"
-import insert from table
+import insert, sort from table
+
+gettime = do
+  ok, socket = pcall require, "socket"
+  ok and socket.gettime or os.clock
+
+pack = (...) -> { n: select("#", ...), ... }
 
 raw_tostring = (o) ->
   if meta = type(o) == "table" and getmetatable o
@@ -15,8 +21,18 @@ raw_tostring = (o) ->
   else
     tostring o
 
-encode_value = (val, seen={}, depth=0) ->
-  depth += 1
+-- numbers in order, then strings alphabetically, then everything else
+key_type_order = { number: 1, string: 2 }
+compare_keys = (a, b) ->
+  ta, tb = type(a), type(b)
+  if ta == tb and key_type_order[ta]
+    return a < b
+
+  oa, ob = key_type_order[ta] or 3, key_type_order[tb] or 3
+  return oa < ob if oa != ob
+  raw_tostring(a) < raw_tostring(b)
+
+encode_value = (val, seen={}) ->
   t = type val
   switch t
     when "table"
@@ -25,13 +41,16 @@ encode_value = (val, seen={}, depth=0) ->
 
       seen[val] = true
 
-      tuples = for k,v in pairs val
-        { encode_value(k, seen, depth), encode_value(v, seen, depth) }
+      keys = [k for k in pairs val]
+      sort keys, compare_keys
+
+      tuples = for k in *keys
+        { encode_value(k, seen), encode_value(val[k], seen) }
 
       if meta = getmetatable val
         insert tuples, {
           { "metatable", "metatable" }
-          encode_value meta, seen, depth
+          encode_value meta, seen
         }
 
       { t, tuples }
@@ -55,12 +74,26 @@ compile = (code, lang, env) ->
       return nil, err unless lua_code
       load_chunk lua_code, "=(moonscript.loadstring)", env
     when "lua"
-      load_chunk code, "=console", env
+      -- try as an expression first so its value is returned, like the Lua REPL
+      if fn = load_chunk "return #{code}", "=console", env
+        fn
+      else
+        load_chunk code, "=console", env
     else
       nil, "unknown language: #{lang}"
 
--- runs code in a sandboxed environment where print writes to the console,
--- returns printed lines and captured queries, or nil and an error
+-- the console's own frames, from xpcall down, aren't useful in a traceback
+error_handler = (err) ->
+  traceback = debug.traceback("", 2)\gsub "^\n", ""
+  if pos = traceback\find "\n[^\n]*xpcall"
+    traceback = traceback\sub 1, pos - 1
+
+  { message: tostring(err), :traceback }
+
+-- runs code in a sandboxed environment where print writes to the console.
+-- Returns a result table with the printed lines, captured queries, return
+-- values, and run time, along with error and traceback if the code failed.
+-- Returns nil and an error if the code can't be compiled.
 run = (self, code, lang="moonscript") ->
   lines = {}
   queries = {}
@@ -81,23 +114,33 @@ run = (self, code, lang="moonscript") ->
   old_query_logger = logger.query
   current_ctx = ngx and ngx.ctx
 
-  logger.query = (q) ->
+  logger.query = (q, duration, ...) ->
     if (ngx and ngx.ctx) == current_ctx
-      insert queries, q
+      insert queries, { query: q, :duration }
 
-    old_query_logger q
+    old_query_logger q, duration, ...
 
   old_console = _G.console
   _G.console = {
     print: console_print
   }
-  ok, err = pcall fn
+  start = gettime!
+  res = pack xpcall fn, error_handler
+  time = gettime! - start
+
   _G.console = old_console
   logger.query = old_query_logger
 
-  return nil, err unless ok
+  result = { :lines, :queries, :time }
 
-  lines, queries
+  if res[1]
+    if res.n > 1
+      result.returns = [encode_value res[i] for i=2,res.n]
+  else
+    result.error = res[2].message
+    result.traceback = res[2].traceback
+
+  result
 
 make = (opts={}) ->
   opts.env or= "development"
@@ -123,11 +166,8 @@ make = (opts={}) ->
         { "lang", one_of: {"lua", "moonscript"} }
       }
 
-      lines, queries = run @, @params.code, @params.lang
-      if lines
-        { json: { :lines, :queries } }
-      else
-        { json: { error: queries } }
+      result, err = run @, @params.code, @params.lang
+      json: result or { error: err }
   }
 
 

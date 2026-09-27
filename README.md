@@ -26,8 +26,16 @@ to print to the browser. It has also been enhanced, you can print tables and
 get an interactive version that you can open and close in the browser. Just
 click on the bold `{ ... }` to open the table up.
 
+The value of the last expression is shown in the result, so you can type an
+expression like `User\find 1` without wrapping it in `print`. In Lua mode, a
+single expression is returned automatically, like the standard Lua REPL.
+
 Any SQL queries that take place when running the code you submit will also be
-captured and printed as part of the result.
+captured and printed as part of the result, along with how long they took when
+`measure_performance` is enabled in your config.
+
+If the code raises an error, anything printed before the error is still shown,
+along with the stack traceback.
 
 The input field is a full multi-line text editor. You can write an entire
 program in it.
