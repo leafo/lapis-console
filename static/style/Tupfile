@@ -1,2 +1,0 @@
-.gitignore
-: foreach *.scss |> sassc < %f > %o |> %B.css

@@ -1,6 +1,5 @@
 local Widget
 Widget = require("lapis.html").Widget
-local embed_assets = true
 local Console
 do
   local _class_0
@@ -19,16 +18,26 @@ do
             button({
               class = "run_btn"
             }, "Run (Ctrl+Enter)")
-            text(" ")
-            return button({
+            button({
               class = "clear_btn"
             }, "Clear (Ctrl+K)")
+            return element("select", {
+              class = "lang_select",
+              title = "Language"
+            }, function()
+              option({
+                value = "moonscript"
+              }, "MoonScript")
+              return option({
+                value = "lua"
+              }, "Lua")
+            end)
           end)
           div(function()
             return textarea()
           end)
           return div({
-            class = "status"
+            class = "status ready"
           }, "Ready")
         end)
         div({
@@ -42,71 +51,29 @@ do
     content = function(self)
       return html_5(function()
         head(function()
-          if embed_assets then
-            self:script("lib_jquery_min_js")
-            self:script("lib_codemirror_js")
-            self:script("mode_moonscript_js")
-            self:script("mode_lua_js")
-            self:script("main_js")
-          else
-            script({
-              type = "text/javascript",
-              src = "/static/lib/jquery_min.js"
-            })
-            script({
-              type = "text/javascript",
-              src = "/static/lib/codemirror.js"
-            })
-            script({
-              type = "text/javascript",
-              src = "/static/lib/mode/moonscript.js"
-            })
-            script({
-              type = "text/javascript",
-              src = "/static/js/main.js"
-            })
-          end
-          if embed_assets then
-            self:style("lib_codemirror_css")
-            self:style("theme_moon_css")
-            return self:style("main_css")
-          else
-            link({
-              rel = "stylesheet",
-              href = "/static/lib/codemirror.css"
-            })
-            link({
-              rel = "stylesheet",
-              href = "/static/lib/theme/moon.css"
-            })
-            return link({
-              rel = "stylesheet",
-              href = "/static/style/main.css"
-            })
-          end
+          meta({
+            charset = "utf-8"
+          })
+          title("Lapis Console")
+          style({
+            type = "text/css"
+          }, function()
+            return raw(require("lapis.console.assets.css"))
+          end)
+          return script({
+            type = "text/javascript"
+          }, function()
+            return raw(require("lapis.console.assets.js"))
+          end)
         end)
         return body(function()
           self:body_content()
           return script({
             type = "text/javascript"
           }, function()
-            return raw([[_editor = new Lapis.Editor("#editor");]])
+            return raw([[new LapisConsole.Editor("#editor");]])
           end)
         end)
-      end)
-    end,
-    script = function(self, name)
-      return script({
-        type = "text/javascript"
-      }, function()
-        return raw(require("lapis.console.assets." .. tostring(name)))
-      end)
-    end,
-    style = function(self, name)
-      return style({
-        type = "text/css"
-      }, function()
-        return raw(require("lapis.console.assets." .. tostring(name)))
       end)
     end
   }

@@ -185,7 +185,7 @@ make = function(opts)
         local moonscript = require("moonscript.base")
         fn, err = moonscript.loadstring(self.params.code)
       else
-        fn, err = loadstring(self.params.code, "console")
+        fn, err = loadstring(self.params.code, "=console")
       end
       if not (fn) then
         return {

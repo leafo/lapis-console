@@ -1,0 +1,221 @@
+body {
+  font-family: sans-serif;
+  font-size: 16px;
+  background: #d6d6d6;
+  margin: 0;
+}
+
+#editor {
+  .editor_top {
+    background: whitesmoke;
+    padding: 20px;
+    border-bottom: 1px solid #b1afaf;
+    box-shadow: 0 -2px 4px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  .cm-editor {
+    font-size: 14px;
+  }
+
+  .log {
+    padding: 0 20px;
+  }
+
+  .footer {
+    text-align: center;
+    margin: 10px;
+    font-size: 12px;
+    color: #838383;
+  }
+
+  .buttons_top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 7px;
+
+    button, select {
+      font-size: 16px;
+      background: #8aa8cf;
+      color: #294364;
+      border: 0;
+      padding: 5px 10px;
+      border-radius: 4px;
+      transition: background 0.2s ease-in-out;
+
+      &:hover {
+        background: #9cb5d6;
+      }
+    }
+
+    button:active {
+      position: relative;
+      top: 1px;
+    }
+
+    select {
+      margin-left: auto;
+    }
+  }
+
+  .status {
+    background: #7bb87b;
+    text-shadow: 1px 1px 1px #488548;
+    color: white;
+    padding: 4px 8px;
+    white-space: pre-wrap;
+    transition: background 0.2s ease-in-out;
+
+    &.error {
+      background: #c25353;
+      text-shadow: 1px 1px 1px #a73b3b;
+    }
+
+    &.loading {
+      background: #e9d674;
+      text-shadow: 1px 1px 1px #a9921b;
+    }
+  }
+
+  .result {
+    border: 1px solid silver;
+    background: white;
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.15);
+    color: #444;
+    margin: 10px 0;
+
+    &.no_output {
+      font-style: italic;
+      color: #888;
+      padding: 10px;
+    }
+
+    .line {
+      font-family: monospace;
+    }
+
+    .value {
+      margin: 5px;
+      padding: 5px;
+      display: inline-block;
+      vertical-align: top;
+
+      &.string {
+        color: #648164;
+
+        &::before, &::after {
+          font-weight: bold;
+          content: '"';
+        }
+
+        &.key::before {
+          content: "";
+        }
+      }
+
+      &.boolean {
+        color: #664b66;
+      }
+
+      &.number {
+        color: #5076a0;
+      }
+
+      &.function, &.recursion, &.metatable {
+        color: #888;
+        font-style: italic;
+      }
+
+      &.recursion::before {
+        content: "(recursion) ";
+        font-style: normal;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      &.key {
+        margin-right: 0;
+        padding-right: 0;
+
+        &::after {
+          content: ": ";
+          font-style: normal;
+          font-weight: bold;
+          color: #444;
+        }
+      }
+
+      &:hover {
+        background: #eee;
+        border-radius: 3px;
+      }
+
+      &.expanded {
+        border-left: 1px dashed silver;
+        margin-left: 10px;
+        padding: 0;
+
+        &:hover {
+          background: white;
+        }
+      }
+    }
+
+    .tuple {
+      margin-left: 10px;
+
+      & > .value {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+    }
+
+    .expandable {
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .closable {
+      font-weight: bold;
+      vertical-align: top;
+      display: inline-block;
+      cursor: pointer;
+      padding: 5px;
+      margin: 5px;
+
+      &:first-child {
+        margin-bottom: 0;
+      }
+
+      &:last-child {
+        margin-top: 0;
+      }
+
+      &:hover {
+        background: #eee;
+        border-radius: 3px;
+      }
+    }
+
+    .queries {
+      font-family: monospace;
+      background: #ddd;
+      border: 1px solid white;
+
+      &::before {
+        content: "Queries:";
+        display: block;
+        background: #c4c4c4;
+        border-bottom: 1px solid #b4b4b4;
+        text-shadow: 1px 1px 0 #ddd;
+        font-size: 12px;
+        padding: 5px;
+        font-family: sans-serif;
+      }
+
+      .query {
+        padding: 5px;
+      }
+    }
+  }
+}

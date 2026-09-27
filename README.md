@@ -36,24 +36,24 @@ The code that runs is not restricted in any way. If you run `while true` it
 will run forever. If someone malicious gets access to it then they can do
 damage to you system.
 
+Code can be written in MoonScript or Lua, selectable from the dropdown next to
+the buttons.
+
 The console is only accessible in the `"development"` environment. It will
 return a 404 if accessed in any other environment. You can bypass this protection
-by passing `{env = "all"}` as the first argument of `make_console`.
+by passing `{env = "all"}` to `console.make`.
 
 ## Building
 
-Uses [Tup][2], the build system.
+The frontend lives in `src/` and is bundled with [esbuild][2]. The bundled
+JavaScript and CSS are written out as Lua modules in `lapis/console/assets/` so
+they can be embedded directly into the page. The generated `.lua` files are
+committed so the rock can be installed without Node.
 
 ```bash
-$ tup init
-$ tup upd
-```
-
-On UNIX or Linux systems, you might need to remove the `.lua` source
-files first to get `tup` to build properly:
-
-```bash
-$ find . -name "*.lua" -exec rm {} \;
+$ npm install
+$ make build   # bundle assets and compile MoonScript
+$ make local   # install the rock locally with LuaRocks
 ```
 
 # Contact
@@ -65,17 +65,9 @@ License: MIT
 
 # License
 
-Lapis Console includes the following libraries:
-
-```
-jQuery v1.9.1 | (c) 2005, 2012 jQuery Foundation, Inc. | jquery.org/license
-```
-
-```
-CodeMirror 3.1 Copyright (C) 2013 by Marijn Haverbeke <marijnh@gmail.com>
-```
+Lapis Console bundles [CodeMirror][3] (MIT), Copyright (C) by Marijn Haverbeke
+and others.
 
   [1]: https://github.com/leafo/lapis
-  [2]: https://gittup.org/tup/
-
-
+  [2]: https://esbuild.github.io/
+  [3]: https://codemirror.net/

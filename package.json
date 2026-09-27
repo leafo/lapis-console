@@ -1,20 +1,23 @@
 {
   "name": "lapis-console",
-  "version": "1.0.0",
+  "private": true,
   "description": "An interactive console for the Lapis web framework.",
-  "main": "index.js",
-  "dependencies": {
-    "coffeescript": "^1.9.2"
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/leafo/lapis-console.git"
   },
-  "author": "",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/leafo/lapis-console/issues"
-  },
-  "homepage": "https://github.com/leafo/lapis-console#readme"
+  "devDependencies": {
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/legacy-modes": "^6.5.4",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.13",
+    "@lezer/highlight": "^1.2.4",
+    "esbuild": "^0.28.2"
+  }
 }

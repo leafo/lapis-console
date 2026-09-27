@@ -110,7 +110,7 @@ make = (opts={}) ->
         moonscript = require "moonscript.base"
         moonscript.loadstring @params.code
       else
-        loadstring @params.code, "console"
+        loadstring @params.code, "=console"
 
       return json: { error: err } unless fn
 
