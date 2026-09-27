@@ -7,7 +7,8 @@ do
   local _base_0 = {
     body_content = function(self)
       return div({
-        id = "editor"
+        id = "editor",
+        ["data-csrf-token"] = self.csrf_token
       }, function()
         div({
           class = "editor_top"

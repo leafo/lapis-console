@@ -10,6 +10,7 @@ do
 end
 local assert_valid
 assert_valid = require("lapis.validate").assert_valid
+local csrf = require("lapis.csrf")
 local insert
 insert = table.insert
 local raw_tostring
@@ -130,14 +131,6 @@ run = function(self, fn)
   end
   return lines, queries
 end
-local same_origin
-same_origin = function(req)
-  local origin = req.headers.origin
-  if not (origin) then
-    return true
-  end
-  return origin:match("^https?://([^/]+)$") == req.headers.host
-end
 local make
 make = function(opts)
   if opts == nil then
@@ -155,20 +148,14 @@ make = function(opts)
   local view = require("lapis.console.views.console")
   return respond_to({
     GET = function(self)
+      self.csrf_token = csrf.generate_token(self)
       return {
         render = view,
         layout = false
       }
     end,
     POST = capture_errors_json(function(self)
-      if not (same_origin(self.req)) then
-        return {
-          status = 403,
-          json = {
-            error = "cross-origin request rejected"
-          }
-        }
-      end
+      csrf.assert_token(self)
       self.params.lang = self.params.lang or "moonscript"
       self.params.code = self.params.code or ""
       assert_valid(self.params, {

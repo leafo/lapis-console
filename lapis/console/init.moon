@@ -8,6 +8,7 @@ config = require"lapis.config".get!
 
 import respond_to, capture_errors_json from require "lapis.application"
 import assert_valid from require "lapis.validate"
+csrf = require "lapis.csrf"
 import insert from table
 
 raw_tostring = (o) ->
@@ -77,12 +78,6 @@ run = (self, fn using nil) ->
 
   lines, queries
 
--- reject cross-origin requests so other sites can't submit code to the console
-same_origin = (req) ->
-  origin = req.headers.origin
-  return true unless origin
-  origin\match("^https?://([^/]+)$") == req.headers.host
-
 make = (opts={}) ->
   opts.env or= "development"
 
@@ -93,11 +88,12 @@ make = (opts={}) ->
 
   respond_to {
     GET: =>
+      @csrf_token = csrf.generate_token @
       render: view, layout: false
 
     POST: capture_errors_json =>
-      unless same_origin @req
-        return status: 403, json: { error: "cross-origin request rejected" }
+      -- prevents other sites from submitting code to the console
+      csrf.assert_token @
 
       @params.lang or= "moonscript"
       @params.code or= ""

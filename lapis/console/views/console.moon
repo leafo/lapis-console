@@ -3,7 +3,7 @@ import Widget from require "lapis.html"
 
 class Console extends Widget
   body_content: =>
-    div id: "editor", ->
+    div id: "editor", "data-csrf-token": @csrf_token, ->
       div class: "editor_top", ->
         div class: "buttons_top", ->
           button class: "run_btn", "Run (Ctrl+Enter)"

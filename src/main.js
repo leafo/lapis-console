@@ -143,6 +143,7 @@ export class Editor {
       const response = await fetch(window.location.href, {
         method: "POST",
         body: new URLSearchParams({
+          csrf_token: this.root.dataset.csrfToken,
           lang: this.langSelect.value,
           code: this.editor.state.doc.toString(),
         }),
