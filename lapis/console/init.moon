@@ -3,7 +3,6 @@ json.encode_max_depth 1000
 
 VERSION = "1.2.0"
 
-lapis = require "lapis.init"
 config = require"lapis.config".get!
 
 import respond_to, capture_errors_json from require "lapis.application"
@@ -42,7 +41,7 @@ encode_value = (val, seen={}, depth=0) ->
     else
       { t, raw_tostring val }
 
-run = (self, fn using nil) ->
+run = (self, fn) ->
   lines = {}
   queries = {}
 
@@ -66,12 +65,12 @@ run = (self, fn using nil) ->
     old_query_logger q
 
   setfenv fn, scope
-  old_console = console
-  export console = {
+  old_console = _G.console
+  _G.console = {
     print: console_print
   }
   ret = { pcall fn }
-  export console = old_console
+  _G.console = old_console
   logger.query = old_query_logger
 
   return unpack ret, 1, 2 unless ret[1]

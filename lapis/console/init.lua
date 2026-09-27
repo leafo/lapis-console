@@ -1,7 +1,6 @@
 local json = require("cjson")
 json.encode_max_depth(1000)
 local VERSION = "1.2.0"
-local lapis = require("lapis.init")
 local config = require("lapis.config").get()
 local respond_to, capture_errors_json
 do
@@ -117,14 +116,14 @@ run = function(self, fn)
     return old_query_logger(q)
   end
   setfenv(fn, scope)
-  local old_console = console
-  console = {
+  local old_console = _G.console
+  _G.console = {
     print = console_print
   }
   local ret = {
     pcall(fn)
   }
-  console = old_console
+  _G.console = old_console
   logger.query = old_query_logger
   if not (ret[1]) then
     return unpack(ret, 1, 2)
