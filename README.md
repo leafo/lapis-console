@@ -17,7 +17,7 @@ $ lapis server development
 
 Hit <http://localhost:8080/console>
 
-![Screenshot](http://leafo.net/dump/lapis_console.png)
+![Screenshot](https://leafo.net/dump/lapis_console.png)
 
 ## Tips
 
@@ -60,7 +60,7 @@ $ find . -name "*.lua" -exec rm {} \;
 
 Author: Leaf Corcoran (leafo) ([@moonscript](http://twitter.com/moonscript))  
 Email: leafot@gmail.com  
-Homepage: <http://leafo.net>  
+Homepage: <https://leafo.net>  
 License: MIT
 
 # License
@@ -76,6 +76,6 @@ CodeMirror 3.1 Copyright (C) 2013 by Marijn Haverbeke <marijnh@gmail.com>
 ```
 
   [1]: https://github.com/leafo/lapis
-  [2]: http://gittup.org/tup/
+  [2]: https://gittup.org/tup/
 
 

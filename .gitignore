@@ -5,3 +5,6 @@ secret/
 cache/
 lint_config.lua
 node_modules
+*.rock
+lapis-console-*.rockspec
+!lapis-console-dev-1.rockspec

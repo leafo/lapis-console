@@ -2,18 +2,21 @@ package = "lapis-console"
 version = "dev-1"
 
 source = {
-  url = "git://github.com/leafo/lapis-console.git"
+  url = "git+https://github.com/leafo/lapis-console.git"
 }
 
 description = {
   summary = "An interactive web based console for Lapis",
+  homepage = "https://github.com/leafo/lapis-console",
   license = "MIT",
   maintainer = "Leaf Corcoran <leafot@gmail.com>",
 }
 
 dependencies = {
   "lua == 5.1",
-  "lapis"
+  "lapis",
+  "lua-cjson",
+  "moonscript",
 }
 
 build = {
