@@ -18,10 +18,23 @@ do
           }, function()
             button({
               class = "run_btn"
-            }, "Run (Ctrl+Enter)")
+            }, function()
+              text("Run ")
+              return span({
+                class = "shortcut"
+              }, "(Ctrl+Enter)")
+            end)
             button({
               class = "clear_btn"
-            }, "Clear (Ctrl+K)")
+            }, function()
+              text("Clear ")
+              return span({
+                class = "shortcut"
+              }, "(Ctrl+K)")
+            end)
+            button({
+              class = "clear_log_btn"
+            }, "Clear log")
             return element("select", {
               class = "lang_select",
               title = "Language"

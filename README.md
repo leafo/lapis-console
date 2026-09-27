@@ -38,7 +38,12 @@ If the code raises an error, anything printed before the error is still shown,
 along with the stack traceback.
 
 The input field is a full multi-line text editor. You can write an entire
-program in it.
+program in it. Run it with Ctrl+Enter (Cmd+Enter on macOS).
+
+Each result shows the code that produced it, click it to load that code back
+into the editor. Previous runs can also be browsed by pressing up on the first
+line of the editor, and down on the last line, like a browser's developer
+console. History is kept for the browser tab's session.
 
 The code that runs is not restricted in any way. If you run `while true` it
 will run forever. If someone malicious gets access to it then they can do

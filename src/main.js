@@ -16,6 +16,9 @@ const languages = {
   lua: StreamLanguage.define(lua),
 }
 
+const isMac = /Mac|iPhone|iPad/.test(navigator.platform)
+const maxHistory = 100
+
 const setErrorLine = StateEffect.define()
 
 const errorLineDecoration = Decoration.line({ class: "has_error" })
@@ -65,7 +68,12 @@ function errorLineNumber(message) {
 function formatDuration(seconds) {
   if (seconds >= 1) return `${seconds.toFixed(2)} s`
   const ms = seconds * 1000
+  if (ms < 0.01) return "< 0.01 ms"
   return `${ms.toFixed(ms < 10 ? 2 : 1)} ms`
+}
+
+function sessionGetJSON(key) {
+  try { return JSON.parse(sessionGet(key)) } catch (e) { return null }
 }
 
 function sessionGet(key) {
@@ -91,12 +99,21 @@ export class Editor {
     this.langSelect.value = lang
     this.language = new Compartment()
 
+    // previous runs as {code, lang}, oldest first. historyIndex is set while
+    // stepping through them, with the unsubmitted draft saved in historyDraft
+    this.history = asArray(sessionGetJSON(`${this.sessionName}:history`))
+    this.historyIndex = null
+    this.historyDraft = null
+
     this.editor = new EditorView({
       doc: sessionGet(this.sessionName) || textarea.value,
       extensions: [
         Prec.highest(keymap.of([
+          { key: "Mod-Enter", run: () => { this.run(); return true } },
           { key: "Ctrl-Enter", run: () => { this.run(); return true } },
-          { key: "Ctrl-k", run: () => { this.clear(); return true } },
+          { key: "Mod-k", run: () => { this.clear(); return true } },
+          { key: "ArrowUp", run: () => this.historyBack() },
+          { key: "ArrowDown", run: () => this.historyForward() },
         ])),
         lineNumbers(),
         highlightActiveLineGutter(),
@@ -112,18 +129,36 @@ export class Editor {
         syntaxHighlighting(moonHighlightStyle),
         errorLine,
         EditorView.updateListener.of(update => {
-          if (update.docChanged) saveSession()
+          if (!update.docChanged) return
+          saveSession()
+          if (!this.settingCode) this.historyIndex = null
         }),
       ],
     })
 
     textarea.replaceWith(this.editor.dom)
 
-    this.root.querySelector(".run_btn").addEventListener("click", () => this.run())
+    if (isMac) {
+      for (const shortcut of this.root.querySelectorAll(".shortcut")) {
+        shortcut.textContent = shortcut.textContent.replace("Ctrl+", "\u2318")
+      }
+    }
+
+    this.runButton = this.root.querySelector(".run_btn")
+    this.runButton.addEventListener("click", () => this.run())
     this.root.querySelector(".clear_btn").addEventListener("click", () => this.clear())
+    this.root.querySelector(".clear_log_btn").addEventListener("click", () => this.log.replaceChildren())
     this.langSelect.addEventListener("change", () => this.setLanguage(this.langSelect.value))
 
     this.log.addEventListener("click", e => {
+      const code = e.target.closest(".result_code")
+      if (code) {
+        this.historyIndex = null
+        this.setCode(code.submission.code, code.submission.lang)
+        this.editor.focus()
+        return
+      }
+
       const expandable = e.target.closest(".expandable")
       if (expandable) return this.expandObject(expandable)
 
@@ -135,14 +170,87 @@ export class Editor {
   }
 
   setLanguage(lang) {
+    this.langSelect.value = lang
     sessionSet(`${this.sessionName}:lang`, lang)
     this.editor.dispatch({ effects: this.language.reconfigure(languages[lang]) })
     this.editor.focus()
   }
 
+  // replaces the editor contents, cursor goes to the end of the first line
+  // or the end of the document
+  setCode(code, lang, cursor = "end") {
+    if (lang && lang != this.langSelect.value) this.setLanguage(lang)
+
+    const anchor = cursor == "first_line" ? code.split("\n")[0].length : code.length
+    this.settingCode = true
+    this.editor.dispatch({
+      changes: { from: 0, to: this.editor.state.doc.length, insert: code },
+      selection: { anchor },
+      scrollIntoView: true,
+    })
+    this.settingCode = false
+  }
+
+  cursorLine() {
+    const { main } = this.editor.state.selection
+    if (!main.empty) return null
+    return this.editor.state.doc.lineAt(main.head).number
+  }
+
+  historyBack() {
+    if (this.cursorLine() != 1 || !this.history.length) return false
+
+    if (this.historyIndex == null) {
+      this.historyDraft = { code: this.editor.state.doc.toString(), lang: this.langSelect.value }
+      this.historyIndex = this.history.length
+    }
+
+    if (this.historyIndex == 0) return false
+    this.historyIndex -= 1
+
+    const entry = this.history[this.historyIndex]
+    this.setCode(entry.code, entry.lang, "first_line")
+    return true
+  }
+
+  historyForward() {
+    if (this.historyIndex == null) return false
+    if (this.cursorLine() != this.editor.state.doc.lines) return false
+
+    this.historyIndex += 1
+    const entry = this.historyIndex < this.history.length
+      ? this.history[this.historyIndex]
+      : this.historyDraft
+
+    if (this.historyIndex >= this.history.length) this.historyIndex = null
+    this.setCode(entry.code, entry.lang)
+    return true
+  }
+
+  addHistory(submission) {
+    const last = this.history[this.history.length - 1]
+    if (last && last.code == submission.code && last.lang == submission.lang) return
+
+    this.history.push(submission)
+    this.history = this.history.slice(-maxHistory)
+    sessionSet(`${this.sessionName}:history`, JSON.stringify(this.history))
+  }
+
   async run() {
+    if (this.running) return
+
+    const submission = {
+      code: this.editor.state.doc.toString(),
+      lang: this.langSelect.value,
+    }
+
+    this.addHistory(submission)
+    this.historyIndex = null
+
     this.editor.dispatch({ effects: setErrorLine.of(null) })
-    this.setStatus("loading", "Loading...")
+    this.setStatus("loading", "Running...")
+    this.running = true
+    this.runButton.disabled = true
 
     let res
     try {
@@ -150,18 +258,20 @@ export class Editor {
         method: "POST",
         body: new URLSearchParams({
           csrf_token: this.root.dataset.csrfToken,
-          lang: this.langSelect.value,
-          code: this.editor.state.doc.toString(),
+          ...submission,
         }),
       })
       res = await response.json()
     } catch (e) {
       this.setStatus("error", `Request failed: ${e.message}`)
       return
+    } finally {
+      this.running = false
+      this.runButton.disabled = false
     }
 
     // the code ran if there's a time, even if it raised an error
-    if (res.time != null) this.renderResult(res)
+    if (res.time != null) this.renderResult(res, submission)
 
     // capture_errors_json responds with errors, the console with error
     const error = res.error || (res.errors && asArray(res.errors).join(", "))
@@ -238,8 +348,15 @@ export class Editor {
     return lineEl
   }
 
-  renderResult(res) {
+  renderResult(res, submission) {
     const row = el("div", "result")
+
+    const codeEl = el("pre", "result_code", submission.code)
+    codeEl.title = "Click to load into the editor"
+    codeEl.dataset.lang = submission.lang == "lua" ? "Lua" : "MoonScript"
+    codeEl.submission = submission
+    row.append(codeEl)
+
     const lines = asArray(res.lines)
     const returns = asArray(res.returns)
     const queries = asArray(res.queries)
@@ -258,7 +375,8 @@ export class Editor {
       row.append(errorEl)
     }
 
-    if (!row.childElementCount) row.append(el("div", "no_output", "No output"))
+    // only the code has been added
+    if (row.childElementCount == 1) row.append(el("div", "no_output", "No output"))
 
     if (queries.length) {
       const queriesEl = el("div", "queries")
