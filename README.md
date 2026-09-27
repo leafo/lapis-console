@@ -26,9 +26,9 @@ to print to the browser. It has also been enhanced, you can print tables and
 get an interactive version that you can open and close in the browser. Just
 click on the bold `{ ... }` to open the table up.
 
-The value of the last expression is shown in the result, so you can type an
-expression like `User\find 1` without wrapping it in `print`. In Lua mode, a
-single expression is returned automatically, like the standard Lua REPL.
+Any values returned by the code are shown in the result. MoonScript returns
+the value of the last expression, so you can type an expression like
+`User\find 1` without wrapping it in `print`. In Lua mode, use `return`.
 
 Any SQL queries that take place when running the code you submit will also be
 captured and printed as part of the result, along with how long they took when

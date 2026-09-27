@@ -144,14 +144,7 @@ compile = function(code, lang, env)
     end
     return load_chunk(lua_code, "=(moonscript.loadstring)", env)
   elseif "lua" == _exp_0 then
-    do
-      local fn = load_chunk("return " .. tostring(code), "=console", env)
-      if fn then
-        return fn
-      else
-        return load_chunk(code, "=console", env)
-      end
-    end
+    return load_chunk(code, "=console", env)
   else
     return nil, "unknown language: " .. tostring(lang)
   end

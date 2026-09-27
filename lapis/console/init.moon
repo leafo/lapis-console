@@ -74,11 +74,7 @@ compile = (code, lang, env) ->
       return nil, err unless lua_code
       load_chunk lua_code, "=(moonscript.loadstring)", env
     when "lua"
-      -- try as an expression first so its value is returned, like the Lua REPL
-      if fn = load_chunk "return #{code}", "=console", env
-        fn
-      else
-        load_chunk code, "=console", env
+      load_chunk code, "=console", env
     else
       nil, "unknown language: #{lang}"
 

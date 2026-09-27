@@ -98,14 +98,14 @@ describe "lapis.console", ->
           {"number", "10"}, {"nil", "nil"}, {"string", "a"}
         }, result.returns
 
-      it "returns a lua expression", ->
-        result = run {}, "1 + 1", "lua"
-        assert.same { {"number", "2"} }, result.returns
-
       it "runs lua statements", ->
         result = run {}, "local x = 2\nprint(x)", "lua"
         assert.same { { {"number", "2"} } }, result.lines
         assert.is_nil result.returns
+
+      it "returns multiple lua values with nils", ->
+        result = run {}, "return 1, nil, 3", "lua"
+        assert.same { {"number", "1"}, {"nil", "nil"}, {"number", "3"} }, result.returns
 
       it "returns explicit lua returns", ->
         result = run {}, "local x = 2\nreturn x, x * 2", "lua"
@@ -134,7 +134,8 @@ describe "lapis.console", ->
       assert.equal old_console, _G.console
 
     it "returns a traceback without the console's frames", ->
-      result = run {}, "f = -> error 'deep'\nf!"
+      -- avoids tail calls, which drop frames from the traceback on LuaJIT
+      result = run {}, "f = ->\n  error 'deep'\n  nil\nf!\nnil"
       assert.truthy result.traceback\match "^stack traceback:"
       assert.truthy result.traceback\find "moonscript.loadstring", 1, true
       assert.falsy result.traceback\find "xpcall", 1, true
