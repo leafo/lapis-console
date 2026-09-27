@@ -83,8 +83,40 @@ encode_value = function(val, seen, depth)
     }
   end
 end
+local load_chunk
+load_chunk = function(code, chunk_name, env)
+  if setfenv then
+    local fn, err = loadstring(code, chunk_name)
+    if not (fn) then
+      return nil, err
+    end
+    return setfenv(fn, env)
+  else
+    return load(code, chunk_name, "t", env)
+  end
+end
+local compile
+compile = function(code, lang, env)
+  local _exp_0 = lang
+  if "moonscript" == _exp_0 then
+    local to_lua
+    to_lua = require("moonscript.base").to_lua
+    local lua_code, err = to_lua(code)
+    if not (lua_code) then
+      return nil, err
+    end
+    return load_chunk(lua_code, "=(moonscript.loadstring)", env)
+  elseif "lua" == _exp_0 then
+    return load_chunk(code, "=console", env)
+  else
+    return nil, "unknown language: " .. tostring(lang)
+  end
+end
 local run
-run = function(self, fn)
+run = function(self, code, lang)
+  if lang == nil then
+    lang = "moonscript"
+  end
   local lines = { }
   local queries = { }
   local console_print
@@ -100,12 +132,16 @@ run = function(self, fn)
       return _accum_0
     end)(...))
   end
-  local scope = setmetatable({
+  local env = setmetatable({
     self = self,
     print = console_print
   }, {
     __index = _G
   })
+  local fn, err = compile(code, lang, env)
+  if not (fn) then
+    return nil, err
+  end
   local logger = require("lapis.logging")
   local old_query_logger = logger.query
   local current_ctx = ngx and ngx.ctx
@@ -115,18 +151,16 @@ run = function(self, fn)
     end
     return old_query_logger(q)
   end
-  setfenv(fn, scope)
   local old_console = _G.console
   _G.console = {
     print = console_print
   }
-  local ret = {
-    pcall(fn)
-  }
+  local ok
+  ok, err = pcall(fn)
   _G.console = old_console
   logger.query = old_query_logger
-  if not (ret[1]) then
-    return unpack(ret, 1, 2)
+  if not (ok) then
+    return nil, err
   end
   return lines, queries
 end
@@ -166,21 +200,7 @@ make = function(opts)
           }
         }
       })
-      local fn, err
-      if self.params.lang == "moonscript" then
-        local moonscript = require("moonscript.base")
-        fn, err = moonscript.loadstring(self.params.code)
-      else
-        fn, err = loadstring(self.params.code, "=console")
-      end
-      if not (fn) then
-        return {
-          json = {
-            error = err
-          }
-        }
-      end
-      local lines, queries = run(self, fn)
+      local lines, queries = run(self, self.params.code, self.params.lang)
       if lines then
         return {
           json = {

@@ -7,8 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # the console uses setfenv, so it's limited to Lua 5.1 and LuaJIT
-        luaVersion: ["5.1", "luajit-openresty"]
+        luaVersion: ["5.1", "5.2", "5.3", "5.4", "luajit", "luajit-openresty"]
 
     runs-on: ubuntu-latest
 
@@ -23,6 +22,7 @@ jobs:
 
     - name: build
       run: |
+        [[ "${{ matrix.luaVersion }}" =~ ^5\.[12]$ ]] && luarocks install luabitop || true
         luarocks install busted
         luarocks make
 
