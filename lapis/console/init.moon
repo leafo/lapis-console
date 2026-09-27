@@ -71,11 +71,17 @@ run = (self, fn using nil) ->
   }
   ret = { pcall fn }
   export console = old_console
-  return unpack ret, 1, 2 unless ret[1]
-
   logger.query = old_query_logger
 
+  return unpack ret, 1, 2 unless ret[1]
+
   lines, queries
+
+-- reject cross-origin requests so other sites can't submit code to the console
+same_origin = (req) ->
+  origin = req.headers.origin
+  return true unless origin
+  origin\match("^https?://([^/]+)$") == req.headers.host
 
 make = (opts={}) ->
   opts.env or= "development"
@@ -90,6 +96,9 @@ make = (opts={}) ->
       render: view, layout: false
 
     POST: capture_errors_json =>
+      unless same_origin @req
+        return status: 403, json: { error: "cross-origin request rejected" }
+
       @params.lang or= "moonscript"
       @params.code or= ""
 
@@ -97,17 +106,19 @@ make = (opts={}) ->
         { "lang", one_of: {"lua", "moonscript"} }
       }
 
-      if @params.lang == "moonscript"
+      fn, err = if @params.lang == "moonscript"
         moonscript = require "moonscript.base"
-        fn, err = moonscript.loadstring @params.code
-        if err
-          { json: { error: err } }
-        else
-          lines, queries = run @, fn
-          if lines
-            { json: { :lines, :queries } }
-          else
-            { json: { error: queries } }
+        moonscript.loadstring @params.code
+      else
+        loadstring @params.code, "console"
+
+      return json: { error: err } unless fn
+
+      lines, queries = run @, fn
+      if lines
+        { json: { :lines, :queries } }
+      else
+        { json: { error: queries } }
   }
 
 

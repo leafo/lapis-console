@@ -124,11 +124,19 @@ run = function(self, fn)
     pcall(fn)
   }
   console = old_console
+  logger.query = old_query_logger
   if not (ret[1]) then
     return unpack(ret, 1, 2)
   end
-  logger.query = old_query_logger
   return lines, queries
+end
+local same_origin
+same_origin = function(req)
+  local origin = req.headers.origin
+  if not (origin) then
+    return true
+  end
+  return origin:match("^https?://([^/]+)$") == req.headers.host
 end
 local make
 make = function(opts)
@@ -153,6 +161,14 @@ make = function(opts)
       }
     end,
     POST = capture_errors_json(function(self)
+      if not (same_origin(self.req)) then
+        return {
+          status = 403,
+          json = {
+            error = "cross-origin request rejected"
+          }
+        }
+      end
       self.params.lang = self.params.lang or "moonscript"
       self.params.code = self.params.code or ""
       assert_valid(self.params, {
@@ -164,32 +180,34 @@ make = function(opts)
           }
         }
       })
+      local fn, err
       if self.params.lang == "moonscript" then
         local moonscript = require("moonscript.base")
-        local fn, err = moonscript.loadstring(self.params.code)
-        if err then
-          return {
-            json = {
-              error = err
-            }
+        fn, err = moonscript.loadstring(self.params.code)
+      else
+        fn, err = loadstring(self.params.code, "console")
+      end
+      if not (fn) then
+        return {
+          json = {
+            error = err
           }
-        else
-          local lines, queries = run(self, fn)
-          if lines then
-            return {
-              json = {
-                lines = lines,
-                queries = queries
-              }
-            }
-          else
-            return {
-              json = {
-                error = queries
-              }
-            }
-          end
-        end
+        }
+      end
+      local lines, queries = run(self, fn)
+      if lines then
+        return {
+          json = {
+            lines = lines,
+            queries = queries
+          }
+        }
+      else
+        return {
+          json = {
+            error = queries
+          }
+        }
       end
     end)
   })
