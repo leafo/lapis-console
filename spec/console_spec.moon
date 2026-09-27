@@ -159,6 +159,11 @@ describe "lapis.console", ->
         res = post { csrf_token: token, lang: "lua", code: "print(1 + 1)" }, prev
         assert.same { { {"number", "2"} } }, res.lines
 
+      it "encodes deeply nested tables", ->
+        code = "t = {}\nc = t\nfor i=1,100\n  c.x = {}\n  c = c.x\nprint t"
+        res = post { csrf_token: token, :code }, prev
+        assert.same "table", res.lines[1][1][1]
+
       it "reports moonscript syntax errors", ->
         res = post { csrf_token: token, code: "x = ((" }, prev
         assert.truthy res.error\match "%[1%]"

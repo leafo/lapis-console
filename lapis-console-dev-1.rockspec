@@ -14,8 +14,7 @@ description = {
 
 dependencies = {
   "lua >= 5.1",
-  "lapis",
-  "lua-cjson",
+  "lapis >= 1.7.0",
   "moonscript",
 }
 

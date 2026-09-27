@@ -1,7 +1,4 @@
-json = require "cjson"
-json.encode_max_depth 1000
-
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 
 config = require"lapis.config".get!
 

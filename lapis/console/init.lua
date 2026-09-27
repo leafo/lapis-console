@@ -1,6 +1,4 @@
-local json = require("cjson")
-json.encode_max_depth(1000)
-local VERSION = "1.2.0"
+local VERSION = "1.3.0"
 local config = require("lapis.config").get()
 local respond_to, capture_errors_json
 do
